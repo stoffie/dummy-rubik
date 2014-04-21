@@ -8,9 +8,7 @@ rubik.enumFromArray = function(array) {
   return obj;
 }
 
-rubik.cube = {};
-
-rubik.cube.EDGES = rubik.enumFromArray([
+rubik.EDGES = rubik.enumFromArray([
   'UF',
   'UL',
   'UB',
@@ -25,7 +23,7 @@ rubik.cube.EDGES = rubik.enumFromArray([
   'BR',
 ]);
 
-rubik.cube.CORNERS = rubik.enumFromArray([
+rubik.CORNERS = rubik.enumFromArray([
   'URF',
   'UFL',
   'UBL',
@@ -36,7 +34,7 @@ rubik.cube.CORNERS = rubik.enumFromArray([
   'DRB',
 ]);
 
-rubik.cube.FACES = rubik.enumFromArray([
+rubik.FACES = rubik.enumFromArray([
   'R',
   'L',
   'U',
@@ -45,7 +43,41 @@ rubik.cube.FACES = rubik.enumFromArray([
   'B',
 ]);
 
-rubik.Cube3D = function(geometry, materials) {
+rubik.MOVES = rubik.enumFromArray([
+  'R',
+  'L',
+  'U',
+  'D',
+  'F',
+  'B',
+  'Ri',
+  'Li',
+  'Ui',
+  'Di',
+  'Fi',
+  'Bi',
+  'R2',
+  'L2',
+  'U2',
+  'D2',
+  'F2',
+  'B2',
+]);
+
+(function(){
+
+var Cubie3D = rubik.Cubie3D = function(geometry, materials) {
+  THREE.Mesh.call(this, geometry, materials);
+}
+
+Cubie3D.prototype = Object.create(THREE.Mesh.prototype);
+
+})();
+
+(function(){
+
+var Cubie3D = rubik.Cubie3D;
+var Cube3D = rubik.Cube3D = function(geometry, materials) {
   THREE.Object3D.call(this);
   this._cubies = {}
   this._animating = false;
@@ -59,9 +91,9 @@ rubik.Cube3D = function(geometry, materials) {
         if (x === 0 && y === 0 && z === 0) {
           continue;
         }
-        var cubie = new rubik.Cubie3D(geometry, new THREE.MeshFaceMaterial(materials));
-        this._cubies[rubik.Cube3D.cubiePosition[i]] = cubie;
-        cubie.rubikPosition = rubik.Cube3D.cubiePosition[i];
+        var cubie = new Cubie3D(geometry, new THREE.MeshFaceMaterial(materials));
+        this._cubies[Cube3D.cubiePosition[i]] = cubie;
+        cubie.rubikPosition = Cube3D.cubiePosition[i];
         i++;
         cubie.position.set(x * magic, y * magic, z * magic);
         this.add(cubie);
@@ -82,102 +114,109 @@ rubik.Cube3D = function(geometry, materials) {
   //this._attachCubiesToRotationNode(rubik.cube.FACES.R);
 }
 
-rubik.Cube3D.prototype = Object.create(THREE.Object3D.prototype);
+Cube3D.prototype = Object.create(THREE.Object3D.prototype);
 
-rubik.Cube3D.cubiePosition = [
-  rubik.cube.CORNERS.DBL, // -1, -1, -1
-  rubik.cube.EDGES.DL, // -1, -1, 0
-  rubik.cube.CORNERS.DLF, // -1, -1, +1
-  rubik.cube.EDGES.LB, // -1, 0, -1
-  rubik.cube.FACES.L, // -1, 0, 0
-  rubik.cube.EDGES.FL, // -1, 0, +1
-  rubik.cube.CORNERS.UBL, // -1, +1, -1
-  rubik.cube.EDGES.UL, // -1, +1, 0
-  rubik.cube.CORNERS.UFL, // -1, +1, +1
-  rubik.cube.EDGES.DB, // 0, -1, -1
-  rubik.cube.FACES.D, // 0, -1, 0
-  rubik.cube.EDGES.DF, // 0, -1, +1
-  rubik.cube.FACES.B, // 0, 0, -1
+Cube3D.AxisX = new THREE.Vector3(1, 0, 0);
+Cube3D.AxisY = new THREE.Vector3(0, 1, 0);
+Cube3D.AxisZ = new THREE.Vector3(0, 0, 1);
+
+Cube3D.cubiePosition = [
+  rubik.CORNERS.DBL, // -1, -1, -1
+  rubik.EDGES.DL, // -1, -1, 0
+  rubik.CORNERS.DLF, // -1, -1, +1
+  rubik.EDGES.LB, // -1, 0, -1
+  rubik.FACES.L, // -1, 0, 0
+  rubik.EDGES.FL, // -1, 0, +1
+  rubik.CORNERS.UBL, // -1, +1, -1
+  rubik.EDGES.UL, // -1, +1, 0
+  rubik.CORNERS.UFL, // -1, +1, +1
+  rubik.EDGES.DB, // 0, -1, -1
+  rubik.FACES.D, // 0, -1, 0
+  rubik.EDGES.DF, // 0, -1, +1
+  rubik.FACES.B, // 0, 0, -1
   // skip cubie 0, 0, 0
-  rubik.cube.FACES.F, // 0, 0, +1
-  rubik.cube.EDGES.UB, // 0, +1, -1
-  rubik.cube.FACES.U, // 0, +1, 0
-  rubik.cube.EDGES.UF, // 0, +1, +1
-  rubik.cube.CORNERS.DRB, // +1, -1, -1
-  rubik.cube.EDGES.DR, // +1, -1, 0
-  rubik.cube.CORNERS.DFR, // +1, -1, +1
-  rubik.cube.EDGES.BR, // +1, 0, -1
-  rubik.cube.FACES.R, // +1, 0, 0
-  rubik.cube.EDGES.RF, // +1, 0, +1
-  rubik.cube.CORNERS.UBR, // +1, +1, -1
-  rubik.cube.EDGES.UR, // +1, +1, 0
-  rubik.cube.CORNERS.URF, // +1, +1, +1
+  rubik.FACES.F, // 0, 0, +1
+  rubik.EDGES.UB, // 0, +1, -1
+  rubik.FACES.U, // 0, +1, 0
+  rubik.EDGES.UF, // 0, +1, +1
+  rubik.CORNERS.DRB, // +1, -1, -1
+  rubik.EDGES.DR, // +1, -1, 0
+  rubik.CORNERS.DFR, // +1, -1, +1
+  rubik.EDGES.BR, // +1, 0, -1
+  rubik.FACES.R, // +1, 0, 0
+  rubik.EDGES.RF, // +1, 0, +1
+  rubik.CORNERS.UBR, // +1, +1, -1
+  rubik.EDGES.UR, // +1, +1, 0
+  rubik.CORNERS.URF, // +1, +1, +1
 ];
 
-rubik.Cube3D.facesNeighbor = {};
-rubik.Cube3D.facesNeighbor[rubik.cube.FACES.R] = [
-  rubik.cube.EDGES.UR,
-  rubik.cube.EDGES.DR,
-  rubik.cube.EDGES.RF,
-  rubik.cube.EDGES.BR,
-  rubik.cube.CORNERS.URF,
-  rubik.cube.CORNERS.UBR,
-  rubik.cube.CORNERS.DFR,
-  rubik.cube.CORNERS.DRB,
+Cube3D.faceNeighbors = {};
+Cube3D.faceNeighbors[rubik.FACES.R] = [
+  rubik.EDGES.UR,
+  rubik.EDGES.DR,
+  rubik.EDGES.RF,
+  rubik.EDGES.BR,
+  rubik.CORNERS.URF,
+  rubik.CORNERS.UBR,
+  rubik.CORNERS.DFR,
+  rubik.CORNERS.DRB,
 ];
-rubik.Cube3D.facesNeighbor[rubik.cube.FACES.L] = [
-  rubik.cube.EDGES.UL,
-  rubik.cube.EDGES.DL,
-  rubik.cube.EDGES.FL,
-  rubik.cube.EDGES.LB,
-  rubik.cube.CORNERS.UFL,
-  rubik.cube.CORNERS.UBL,
-  rubik.cube.CORNERS.DLF,
-  rubik.cube.CORNERS.DBL,
+Cube3D.faceNeighbors[rubik.FACES.L] = [
+  rubik.EDGES.UL,
+  rubik.EDGES.DL,
+  rubik.EDGES.FL,
+  rubik.EDGES.LB,
+  rubik.CORNERS.UFL,
+  rubik.CORNERS.UBL,
+  rubik.CORNERS.DLF,
+  rubik.CORNERS.DBL,
 ];
-rubik.Cube3D.facesNeighbor[rubik.cube.FACES.U] = [
-  rubik.cube.EDGES.UL,
-  rubik.cube.EDGES.UR,
-  rubik.cube.EDGES.UF,
-  rubik.cube.EDGES.UB,
-  rubik.cube.CORNERS.URF,
-  rubik.cube.CORNERS.UBR,
-  rubik.cube.CORNERS.UFL,
-  rubik.cube.CORNERS.UBL,
+Cube3D.faceNeighbors[rubik.FACES.U] = [
+  rubik.EDGES.UL,
+  rubik.EDGES.UR,
+  rubik.EDGES.UF,
+  rubik.EDGES.UB,
+  rubik.CORNERS.URF,
+  rubik.CORNERS.UBR,
+  rubik.CORNERS.UFL,
+  rubik.CORNERS.UBL,
 ];
-rubik.Cube3D.facesNeighbor[rubik.cube.FACES.D] = [
-  rubik.cube.EDGES.DL,
-  rubik.cube.EDGES.DR,
-  rubik.cube.EDGES.DF,
-  rubik.cube.EDGES.DB,
-  rubik.cube.CORNERS.DFR,
-  rubik.cube.CORNERS.DRB,
-  rubik.cube.CORNERS.DLF,
-  rubik.cube.CORNERS.DBL,
+Cube3D.faceNeighbors[rubik.FACES.D] = [
+  rubik.EDGES.DL,
+  rubik.EDGES.DR,
+  rubik.EDGES.DF,
+  rubik.EDGES.DB,
+  rubik.CORNERS.DFR,
+  rubik.CORNERS.DRB,
+  rubik.CORNERS.DLF,
+  rubik.CORNERS.DBL,
 ];
-rubik.Cube3D.facesNeighbor[rubik.cube.FACES.F] = [
-  rubik.cube.EDGES.UF,
-  rubik.cube.EDGES.DF,
-  rubik.cube.EDGES.FL,
-  rubik.cube.EDGES.RF,
-  rubik.cube.CORNERS.URF,
-  rubik.cube.CORNERS.DFR,
-  rubik.cube.CORNERS.UFL,
-  rubik.cube.CORNERS.DLF,
+Cube3D.faceNeighbors[rubik.FACES.F] = [
+  rubik.EDGES.UF,
+  rubik.EDGES.DF,
+  rubik.EDGES.FL,
+  rubik.EDGES.RF,
+  rubik.CORNERS.URF,
+  rubik.CORNERS.DFR,
+  rubik.CORNERS.UFL,
+  rubik.CORNERS.DLF,
 ];
-rubik.Cube3D.facesNeighbor[rubik.cube.FACES.B] = [
-  rubik.cube.EDGES.UB,
-  rubik.cube.EDGES.DB,
-  rubik.cube.EDGES.LB,
-  rubik.cube.EDGES.BR,
-  rubik.cube.CORNERS.UBR,
-  rubik.cube.CORNERS.DRB,
-  rubik.cube.CORNERS.UBL,
-  rubik.cube.CORNERS.DBL,
+Cube3D.faceNeighbors[rubik.FACES.B] = [
+  rubik.EDGES.UB,
+  rubik.EDGES.DB,
+  rubik.EDGES.LB,
+  rubik.EDGES.BR,
+  rubik.CORNERS.UBR,
+  rubik.CORNERS.DRB,
+  rubik.CORNERS.UBL,
+  rubik.CORNERS.DBL,
 ];
 
-rubik.Cube3D.prototype._attachCubiesToRotationNode = function(face) {
-  var neighbors = rubik.Cube3D.facesNeighbor[face];
+Cube3D.rotations = {};
+Cube3D.rotations[rubik.FACES.R] = { axis: Cube3D.AxisX, multiplier: 1};
+
+Cube3D.prototype._attachCubiesToRotationNode = function(face) {
+  var neighbors = Cube3D.faceNeighbors[face];
   var cubie = this._cubies[face];
   this._rotationNode.add(cubie);
   for (var i = 0; i < neighbors.length; i++) {
@@ -187,7 +226,7 @@ rubik.Cube3D.prototype._attachCubiesToRotationNode = function(face) {
   }
 }
 
-rubik.Cube3D.prototype._detachCubiesFromRotationNode = function() {
+Cube3D.prototype._detachCubiesFromRotationNode = function() {
   for (var i = 0; i < this._rotationNode.children.length; i++) {
     var cubie = this._rotationNode.children[i];
     // move the cubie back to the root node
@@ -195,11 +234,7 @@ rubik.Cube3D.prototype._detachCubiesFromRotationNode = function() {
   }
 }
 
-rubik.Cubie3D = function(geometry, materials) {
-  THREE.Mesh.call(this, geometry, materials);
-}
-
-rubik.Cubie3D.prototype = Object.create(THREE.Mesh.prototype);
+})();
 
 function onDocumentMouseDown(event)
 {
