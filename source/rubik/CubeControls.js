@@ -9,7 +9,7 @@ rubik.CubeControls = function(camera, cube3d, domElement) {
   this.speed = 0.01;
   this.minPhi = 0; // radians
   this.maxPhi = Math.PI; // radians
-  this.animationSteps = 60;
+  this.animationSteps = 5;
 
   // watch the front face of the cube
   this.phi = Math.PI / 2;

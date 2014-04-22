@@ -176,17 +176,18 @@ Cube3D.prototype.startAnimation = function(movement, steps) {
   this._animationSteps = steps;
   this._attachCubiesToRotationNode(movement);
   this._rotation = Cube3D.ROTATION[movement];
+  this._angle = ((Math.PI / 2) * this._rotation.multiplier) / this._animationSteps;
 }
 
 Cube3D.prototype.update = function() {
   if (!this.animating) {
     return;
   }
-  var angle = ((Math.PI / 2) * this._rotation.multiplier * this._stepCount++) / this._animationSteps;
-  this._rotationNode.rotateOnAxis(this._rotation.axis, angle);
-  if (this._stepCounter === this._animationSteps) {
+  this._rotationNode.rotateOnAxis(this._rotation.axis, this._angle);
+  if (this._stepCount++ === this._animationSteps) {
     this.animating = false;
-    this,_detachCubiesFromRotationNode();
+    this._detachCubiesFromRotationNode();
+    this._rotationNode.rotation = new THREE.Euler(0, 0, 0, 'XYZ');
   }
 }
 
@@ -202,8 +203,9 @@ Cube3D.prototype._attachCubiesToRotationNode = function(face) {
 }
 
 Cube3D.prototype._detachCubiesFromRotationNode = function() {
-  for (var i = 0; i < this._rotationNode.children.length; i++) {
-    var cubie = this._rotationNode.children[i];
+  var children = this._rotationNode.children.slice(0) // clone
+  for (var i = 0; i < children.length; i++) {
+    var cubie = children[i];
     // move the cubie back to the root node
     this.add(cubie);
   }
