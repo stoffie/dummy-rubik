@@ -5,12 +5,15 @@ rubik.CubeControls = function(camera, cube3d, domElement) {
   this.cube3d = cube3d;
   this.domElement = domElement;
 
+  this.radius = 1;
   this.speed = 0.01;
-  this.minPolarAngle = 0; // radians
-  this.maxPolarAngle = Math.PI; // radians
+  this.minPhi = 0; // radians
+  this.maxPhi = Math.PI; // radians
+  this.animationSteps = 60;
 
-  var phi = Math.PI / 2;
-  var theta = 0;
+  // watch the front face of the cube
+  this.phi = Math.PI / 2;
+  this.theta = 0;
 
   var rotateStart = new THREE.Vector2();
   var rotateEnd = new THREE.Vector2();
@@ -18,29 +21,28 @@ rubik.CubeControls = function(camera, cube3d, domElement) {
 
   var onMouseDown = function(event) {
     event.preventDefault();
-    rotateStart.set(event.clientX, event.clientY);
-    scope.domElement.addEventListener('mousemove', onMouseMove, false );
-    scope.domElement.addEventListener('mouseup', onMouseUp, false );
+    var cubie = scope._castPickRay(event);
+    if (cubie &&
+        rubik.FACES[cubie.rubikPosition] !== undefined &&
+        !scope.cube3d.animating) {
+      scope.cube3d.startAnimation(cubie.rubikPosition, scope.animationSteps);
+    } else {
+      rotateStart.set(event.clientX, event.clientY);
+      scope.domElement.addEventListener('mousemove', onMouseMove, false );
+      scope.domElement.addEventListener('mouseup', onMouseUp, false );
+    }
   }
 
-  function onMouseMove(event) {
+  var onMouseMove = function(event) {
     event.preventDefault();
     rotateEnd.set(event.clientX, event.clientY);
     rotateDelta.subVectors(rotateEnd, rotateStart);
-
-    var radius = 10;
-
-    theta -= rotateDelta.x * scope.speed;
-
-    phi -= rotateDelta.y * scope.speed;
+    scope.theta -= rotateDelta.x * scope.speed;
+    scope.phi -= rotateDelta.y * scope.speed;
     // restrict phi to be between desired limits
-    phi = Math.max(scope.minPolarAngle, Math.min(scope.maxPolarAngle, phi));
-
-    camera.position.x = radius * Math.sin(phi) * Math.sin(theta);
-    camera.position.y = radius * Math.cos(phi);
-    camera.position.z = radius * Math.sin(phi) * Math.cos(theta);
-    camera.lookAt(cube3d.position);
-
+    scope.phi = Math.min(scope.maxPhi, scope.phi);
+    scope.phi = Math.max(scope.minPhi, scope.phi);
+    scope.updateCameraPosition();
     rotateStart.copy(rotateEnd);
   }
 
@@ -56,4 +58,23 @@ rubik.CubeControls = function(camera, cube3d, domElement) {
 };
 
 rubik.CubeControls.prototype.updateCameraPosition = function() {
+  this.camera.position.x = this.radius * Math.sin(this.phi) * Math.sin(this.theta);
+  this.camera.position.y = this.radius * Math.cos(this.phi);
+  this.camera.position.z = this.radius * Math.sin(this.phi) * Math.cos(this.theta);
+  this.camera.lookAt(this.cube3d.position);
+}
+
+rubik.CubeControls.prototype._castPickRay = function(event) {
+  var mouseX = (event.clientX / window.innerWidth)*2-1;
+  var mouseY = -(event.clientY /window.innerHeight)*2+1;
+  var vector = new THREE.Vector3(mouseX, mouseY, 0.5);
+  var projector = new THREE.Projector();
+  projector.unprojectVector(vector, camera);
+  vector.sub(this.camera.position).normalize()
+  var raycaster = new THREE.Raycaster(this.camera.position, vector);
+  var intersects = raycaster.intersectObjects(cube3d.children, true);
+  if ( intersects.length > 0 ) {
+      return intersects[0].object;
+  }
+  return null;
 }

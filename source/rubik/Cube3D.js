@@ -3,6 +3,12 @@
 var Cubie3D = rubik.Cubie3D;
 var Cube3D = rubik.Cube3D = function(geometry, materials) {
   THREE.Object3D.call(this);
+
+  this.animating = false;
+
+  this._rotation = null;
+  this._animationSteps = 0;
+  this._stepCount = 0;
   this._cubies = {}
   this._animating = false;
   this._rotationNode = new THREE.Object3D();
@@ -137,24 +143,24 @@ Cube3D.FACE_NEIGHBORS[rubik.FACES.B] = [
 ];
 
 Cube3D.ROTATION = {};
-Cube3D.ROTATION[rubik.FACES.R] = { axis: Cube3D.axisX, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.L] = { axis: Cube3D.axisX, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.U] = { axis: Cube3D.axisY, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.D] = { axis: Cube3D.axisY, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.F] = { axis: Cube3D.axisZ, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.B] = { axis: Cube3D.axisZ, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.Ri] = { axis: Cube3D.axisX, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.Li] = { axis: Cube3D.axisX, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.Ui] = { axis: Cube3D.axisY, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.Di] = { axis: Cube3D.axisY, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.Fi] = { axis: Cube3D.axisZ, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.Bi] = { axis: Cube3D.axisZ, multiplier: 1};
-Cube3D.ROTATION[rubik.FACES.R2] = { axis: Cube3D.axisX, multiplier: 2};
-Cube3D.ROTATION[rubik.FACES.L2] = { axis: Cube3D.axisX, multiplier: 2};
-Cube3D.ROTATION[rubik.FACES.U2] = { axis: Cube3D.axisY, multiplier: 2};
-Cube3D.ROTATION[rubik.FACES.D2] = { axis: Cube3D.axisY, multiplier: 2};
-Cube3D.ROTATION[rubik.FACES.F2] = { axis: Cube3D.axisZ, multiplier: 2};
-Cube3D.ROTATION[rubik.FACES.B2] = { axis: Cube3D.axisZ, multiplier: 2};
+Cube3D.ROTATION[rubik.MOVES.R] = { axis: Cube3D.axisX, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.L] = { axis: Cube3D.axisX, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.U] = { axis: Cube3D.axisY, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.D] = { axis: Cube3D.axisY, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.F] = { axis: Cube3D.axisZ, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.B] = { axis: Cube3D.axisZ, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.Ri] = { axis: Cube3D.axisX, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.Li] = { axis: Cube3D.axisX, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.Ui] = { axis: Cube3D.axisY, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.Di] = { axis: Cube3D.axisY, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.Fi] = { axis: Cube3D.axisZ, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.Bi] = { axis: Cube3D.axisZ, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.R2] = { axis: Cube3D.axisX, multiplier: 2};
+Cube3D.ROTATION[rubik.MOVES.L2] = { axis: Cube3D.axisX, multiplier: 2};
+Cube3D.ROTATION[rubik.MOVES.U2] = { axis: Cube3D.axisY, multiplier: 2};
+Cube3D.ROTATION[rubik.MOVES.D2] = { axis: Cube3D.axisY, multiplier: 2};
+Cube3D.ROTATION[rubik.MOVES.F2] = { axis: Cube3D.axisZ, multiplier: 2};
+Cube3D.ROTATION[rubik.MOVES.B2] = { axis: Cube3D.axisZ, multiplier: 2};
 
 Cube3D.INVERSE_ROTATION = {};
 Cube3D.INVERSE_ROTATION[rubik.FACES.R] = rubik.FACES.Ri
@@ -163,6 +169,26 @@ Cube3D.INVERSE_ROTATION[rubik.FACES.U] = rubik.FACES.Ui
 Cube3D.INVERSE_ROTATION[rubik.FACES.D] = rubik.FACES.Di
 Cube3D.INVERSE_ROTATION[rubik.FACES.F] = rubik.FACES.Fi
 Cube3D.INVERSE_ROTATION[rubik.FACES.B] = rubik.FACES.Bi
+
+Cube3D.prototype.startAnimation = function(movement, steps) {
+  this.animating = true;
+  this._stepCount = 0;
+  this._animationSteps = steps;
+  this._attachCubiesToRotationNode(movement);
+  this._rotation = Cube3D.ROTATION[movement];
+}
+
+Cube3D.prototype.update = function() {
+  if (!this.animating) {
+    return;
+  }
+  var angle = ((Math.PI / 2) * this._rotation.multiplier * this._stepCount++) / this._animationSteps;
+  this._rotationNode.rotateOnAxis(this._rotation.axis, angle);
+  if (this._stepCounter === this._animationSteps) {
+    this.animating = false;
+    this,_detachCubiesFromRotationNode();
+  }
+}
 
 Cube3D.prototype._attachCubiesToRotationNode = function(face) {
   var neighbors = Cube3D.FACE_NEIGHBORS[face];
