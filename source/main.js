@@ -30,6 +30,7 @@ loader.load("models/cubie.js", function(geometry, materials) {
   controls.radius = 10;
   controls.phi = Math.PI / 3;
   controls.theta = Math.PI / 4;
+  controls.animationSteps = 10;
   controls.updateCameraPosition();
   render();
 });

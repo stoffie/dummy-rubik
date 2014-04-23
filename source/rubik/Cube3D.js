@@ -30,18 +30,6 @@ var Cube3D = rubik.Cube3D = function(geometry, materials) {
       }
     }
   }
-  //this._rotationNode.rotation.z = Math.PI / 4;
-  //this._attachCubiesToRotationNode(rubik.cube.FACES.F);
-  //this._rotationNode.rotation.z = Math.PI / 4;
-  //this._attachCubiesToRotationNode(rubik.cube.FACES.B);
-  //this._rotationNode.rotation.y = Math.PI / 4;
-  //this._attachCubiesToRotationNode(rubik.cube.FACES.U);
-  //this._rotationNode.rotation.y = Math.PI / 4;
-  //this._attachCubiesToRotationNode(rubik.cube.FACES.D);
-  //this._rotationNode.rotation.x = Math.PI / 4;
-  //this._attachCubiesToRotationNode(rubik.cube.FACES.L);
-  //this._rotationNode.rotation.x = Math.PI / 4;
-  //this._attachCubiesToRotationNode(rubik.cube.FACES.R);
 }
 
 Cube3D.prototype = Object.create(THREE.Object3D.prototype);
@@ -143,18 +131,18 @@ Cube3D.FACE_NEIGHBORS[rubik.FACES.B] = [
 ];
 
 Cube3D.ROTATION = {};
-Cube3D.ROTATION[rubik.MOVES.R] = { axis: Cube3D.axisX, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.R] = { axis: Cube3D.axisX, multiplier: -1};
 Cube3D.ROTATION[rubik.MOVES.L] = { axis: Cube3D.axisX, multiplier: 1};
-Cube3D.ROTATION[rubik.MOVES.U] = { axis: Cube3D.axisY, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.U] = { axis: Cube3D.axisY, multiplier: -1};
 Cube3D.ROTATION[rubik.MOVES.D] = { axis: Cube3D.axisY, multiplier: 1};
-Cube3D.ROTATION[rubik.MOVES.F] = { axis: Cube3D.axisZ, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.F] = { axis: Cube3D.axisZ, multiplier: -1};
 Cube3D.ROTATION[rubik.MOVES.B] = { axis: Cube3D.axisZ, multiplier: 1};
 Cube3D.ROTATION[rubik.MOVES.Ri] = { axis: Cube3D.axisX, multiplier: 1};
-Cube3D.ROTATION[rubik.MOVES.Li] = { axis: Cube3D.axisX, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.Li] = { axis: Cube3D.axisX, multiplier: -1};
 Cube3D.ROTATION[rubik.MOVES.Ui] = { axis: Cube3D.axisY, multiplier: 1};
-Cube3D.ROTATION[rubik.MOVES.Di] = { axis: Cube3D.axisY, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.Di] = { axis: Cube3D.axisY, multiplier: -1};
 Cube3D.ROTATION[rubik.MOVES.Fi] = { axis: Cube3D.axisZ, multiplier: 1};
-Cube3D.ROTATION[rubik.MOVES.Bi] = { axis: Cube3D.axisZ, multiplier: 1};
+Cube3D.ROTATION[rubik.MOVES.Bi] = { axis: Cube3D.axisZ, multiplier: -1};
 Cube3D.ROTATION[rubik.MOVES.R2] = { axis: Cube3D.axisX, multiplier: 2};
 Cube3D.ROTATION[rubik.MOVES.L2] = { axis: Cube3D.axisX, multiplier: 2};
 Cube3D.ROTATION[rubik.MOVES.U2] = { axis: Cube3D.axisY, multiplier: 2};
@@ -163,18 +151,19 @@ Cube3D.ROTATION[rubik.MOVES.F2] = { axis: Cube3D.axisZ, multiplier: 2};
 Cube3D.ROTATION[rubik.MOVES.B2] = { axis: Cube3D.axisZ, multiplier: 2};
 
 Cube3D.INVERSE_ROTATION = {};
-Cube3D.INVERSE_ROTATION[rubik.FACES.R] = rubik.FACES.Ri
-Cube3D.INVERSE_ROTATION[rubik.FACES.L] = rubik.FACES.Li
-Cube3D.INVERSE_ROTATION[rubik.FACES.U] = rubik.FACES.Ui
-Cube3D.INVERSE_ROTATION[rubik.FACES.D] = rubik.FACES.Di
-Cube3D.INVERSE_ROTATION[rubik.FACES.F] = rubik.FACES.Fi
-Cube3D.INVERSE_ROTATION[rubik.FACES.B] = rubik.FACES.Bi
+Cube3D.INVERSE_ROTATION[rubik.MOVES.R] = rubik.MOVES.Ri
+Cube3D.INVERSE_ROTATION[rubik.MOVES.L] = rubik.MOVES.Li
+Cube3D.INVERSE_ROTATION[rubik.MOVES.U] = rubik.MOVES.Ui
+Cube3D.INVERSE_ROTATION[rubik.MOVES.D] = rubik.MOVES.Di
+Cube3D.INVERSE_ROTATION[rubik.MOVES.F] = rubik.MOVES.Fi
+Cube3D.INVERSE_ROTATION[rubik.MOVES.B] = rubik.MOVES.Bi
 
-Cube3D.prototype.startAnimation = function(movement, steps) {
+Cube3D.prototype.startAnimation = function(face, movement, steps) {
   this.animating = true;
+  this._movement = movement;
   this._stepCount = 0;
   this._animationSteps = steps;
-  this._attachCubiesToRotationNode(movement);
+  this._attachCubiesToRotationNode(face);
   this._rotation = Cube3D.ROTATION[movement];
   this._angle = ((Math.PI / 2) * this._rotation.multiplier) / this._animationSteps;
 }
@@ -186,6 +175,7 @@ Cube3D.prototype.update = function() {
   this._rotationNode.rotateOnAxis(this._rotation.axis, this._angle);
   if (this._stepCount++ === this._animationSteps) {
     this.animating = false;
+    this._propagateMovementToCubies();
     this._detachCubiesFromRotationNode();
     this._rotationNode.rotation = new THREE.Euler(0, 0, 0, 'XYZ');
   }
@@ -208,6 +198,14 @@ Cube3D.prototype._detachCubiesFromRotationNode = function() {
     var cubie = children[i];
     // move the cubie back to the root node
     this.add(cubie);
+  }
+}
+
+Cube3D.prototype._propagateMovementToCubies = function() {
+  for (var i = 0; i < this._rotationNode.children.length; i++) {
+    var cubie = this._rotationNode.children[i];
+    // move the cubie
+    cubie[this._movement]();
   }
 }
 

@@ -25,8 +25,17 @@ rubik.CubeControls = function(camera, cube3d, domElement) {
     if (cubie &&
         rubik.FACES[cubie.rubikPosition] !== undefined &&
         !scope.cube3d.animating) {
-      scope.cube3d.startAnimation(cubie.rubikPosition, scope.animationSteps);
+      // perform animation
+      var face = cubie.rubikPosition;
+      var movement;
+      if (event.button == 0) {
+        movement = cubie.rubikPosition;
+      } else {
+        movement = rubik.Cube3D.INVERSE_ROTATION[cubie.rubikPosition];
+      }
+      scope.cube3d.startAnimation(face, movement, scope.animationSteps);
     } else {
+      // drag the camera around
       rotateStart.set(event.clientX, event.clientY);
       scope.domElement.addEventListener('mousemove', onMouseMove, false );
       scope.domElement.addEventListener('mouseup', onMouseUp, false );
