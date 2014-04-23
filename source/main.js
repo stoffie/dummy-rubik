@@ -21,7 +21,6 @@ scene.add(ambientLight);
 
 var loader = new THREE.JSONLoader(true);
 
-var controls;
 loader.load("models/cubie.js", function(geometry, materials) {
   cube3d = new rubik.Cube3D(geometry, materials);
   scene.add(cube3d);
