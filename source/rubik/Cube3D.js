@@ -175,6 +175,7 @@ Cube3D.prototype.update = function() {
   this._rotationNode.rotateOnAxis(this._rotation.axis, this._angle);
   if (this._stepCount++ === this._animationSteps) {
     this.animating = false;
+    this[this._movement]();
     this._propagateMovementToCubies();
     this._detachCubiesFromRotationNode();
     this._rotationNode.rotation = new THREE.Euler(0, 0, 0, 'XYZ');
@@ -204,9 +205,137 @@ Cube3D.prototype._detachCubiesFromRotationNode = function() {
 Cube3D.prototype._propagateMovementToCubies = function() {
   for (var i = 0; i < this._rotationNode.children.length; i++) {
     var cubie = this._rotationNode.children[i];
-    // move the cubie
+    // move the cubie faces
     cubie[this._movement]();
   }
 }
+
+Cube3D.prototype._moveCubies = function(e1, e2, e3, e4, c1, c2, c3, c4) {
+  var cubies = this._cubies;
+  var tmp = this._cubies[e1].material;
+  cubies[e1].material = cubies[e2].material;
+  cubies[e2].material = cubies[e3].material;
+  cubies[e3].material = cubies[e4].material;
+  cubies[e4].material = tmp;
+  tmp = this._cubies[c1].material;
+  cubies[c1].material = cubies[c2].material;
+  cubies[c2].material = cubies[c3].material;
+  cubies[c3].material = cubies[c4].material;
+  cubies[c4].material = tmp;
+};
+
+Cube3D.prototype[rubik.MOVES.R] = function() {
+  this._moveCubies(
+    rubik.EDGES.UR,
+    rubik.EDGES.BR,
+    rubik.EDGES.DR,
+    rubik.EDGES.RF,
+    rubik.CORNERS.URF,
+    rubik.CORNERS.UBR,
+    rubik.CORNERS.DRB,
+    rubik.CORNERS.DFR
+  );
+};
+
+Cube3D.prototype[rubik.MOVES.L] = function() {
+  this._moveCubies(
+    rubik.EDGES.UL,
+    rubik.EDGES.LB,
+    rubik.EDGES.DL,
+    rubik.EDGES.FL,
+    rubik.CORNERS.UFL,
+    rubik.CORNERS.UBL,
+    rubik.CORNERS.DBL,
+    rubik.CORNERS.DLF
+  );
+};
+
+Cube3D.prototype[rubik.MOVES.U] = function() {
+  this._moveCubies(
+    rubik.EDGES.UF,
+    rubik.EDGES.UR,
+    rubik.EDGES.UB,
+    rubik.EDGES.UL,
+    rubik.CORNERS.URF,
+    rubik.CORNERS.UBR,
+    rubik.CORNERS.UBL,
+    rubik.CORNERS.UFL
+  );
+};
+
+Cube3D.prototype[rubik.MOVES.D] = function() {
+  this._moveCubies(
+    rubik.EDGES.DF,
+    rubik.EDGES.DR,
+    rubik.EDGES.DB,
+    rubik.EDGES.DR,
+    rubik.CORNERS.DFR,
+    rubik.CORNERS.DRB,
+    rubik.CORNERS.DBL,
+    rubik.CORNERS.DRB
+  );
+};
+
+Cube3D.prototype[rubik.MOVES.F] = function() {
+  this._moveCubies(
+    rubik.EDGES.UF,
+    rubik.EDGES.RF,
+    rubik.EDGES.DF,
+    rubik.EDGES.FL,
+    rubik.CORNERS.URF,
+    rubik.CORNERS.UFL,
+    rubik.CORNERS.DLF,
+    rubik.CORNERS.DFR
+  );
+};
+
+Cube3D.prototype[rubik.MOVES.B] = function() {
+  this._moveCubies(
+    rubik.EDGES.UB,
+    rubik.EDGES.BR,
+    rubik.EDGES.DB,
+    rubik.EDGES.LB,
+    rubik.CORNERS.UBR,
+    rubik.CORNERS.UBL,
+    rubik.CORNERS.DBL,
+    rubik.CORNERS.DRB
+  );
+};
+
+Cube3D.prototype[rubik.MOVES.Ri] = function() {
+  this[rubik.MOVES.R]();
+  this[rubik.MOVES.R]();
+  this[rubik.MOVES.R]();
+};
+
+Cube3D.prototype[rubik.MOVES.Li] = function() {
+  this[rubik.MOVES.L]();
+  this[rubik.MOVES.L]();
+  this[rubik.MOVES.L]();
+};
+
+Cube3D.prototype[rubik.MOVES.Ui] = function() {
+  this[rubik.MOVES.U]();
+  this[rubik.MOVES.U]();
+  this[rubik.MOVES.U]();
+};
+
+Cube3D.prototype[rubik.MOVES.Di] = function() {
+  this[rubik.MOVES.D]();
+  this[rubik.MOVES.D]();
+  this[rubik.MOVES.D]();
+};
+
+Cube3D.prototype[rubik.MOVES.Fi] = function() {
+  this[rubik.MOVES.F]();
+  this[rubik.MOVES.F]();
+  this[rubik.MOVES.F]();
+};
+
+Cube3D.prototype[rubik.MOVES.Bi] = function() {
+  this[rubik.MOVES.B]();
+  this[rubik.MOVES.B]();
+  this[rubik.MOVES.B]();
+};
 
 })();
