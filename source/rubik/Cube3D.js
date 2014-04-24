@@ -27,6 +27,12 @@ var Cube3D = rubik.Cube3D = function(geometry, materials) {
         i++;
         cubie.position.set(x * magic, y * magic, z * magic);
         this.add(cubie);
+
+        //
+        //if (!rubik.EDGES[cubie.rubikPosition] &&
+        //    !rubik.FACES[cubie.rubikPosition]) {
+        //  cubie.visible=0;
+        //}
       }
     }
   }
@@ -227,13 +233,13 @@ Cube3D.prototype._moveCubies = function(e1, e2, e3, e4, c1, c2, c3, c4) {
 Cube3D.prototype[rubik.MOVES.R] = function() {
   this._moveCubies(
     rubik.EDGES.UR,
-    rubik.EDGES.BR,
-    rubik.EDGES.DR,
     rubik.EDGES.RF,
+    rubik.EDGES.DR,
+    rubik.EDGES.BR,
     rubik.CORNERS.URF,
-    rubik.CORNERS.UBR,
+    rubik.CORNERS.DFR,
     rubik.CORNERS.DRB,
-    rubik.CORNERS.DFR
+    rubik.CORNERS.UBR
   );
 };
 
@@ -266,11 +272,11 @@ Cube3D.prototype[rubik.MOVES.U] = function() {
 Cube3D.prototype[rubik.MOVES.D] = function() {
   this._moveCubies(
     rubik.EDGES.DF,
-    rubik.EDGES.DR,
+    rubik.EDGES.DL,
     rubik.EDGES.DB,
     rubik.EDGES.DR,
     rubik.CORNERS.DFR,
-    rubik.CORNERS.DRB,
+    rubik.CORNERS.DLF,
     rubik.CORNERS.DBL,
     rubik.CORNERS.DRB
   );
@@ -279,9 +285,9 @@ Cube3D.prototype[rubik.MOVES.D] = function() {
 Cube3D.prototype[rubik.MOVES.F] = function() {
   this._moveCubies(
     rubik.EDGES.UF,
-    rubik.EDGES.RF,
-    rubik.EDGES.DF,
     rubik.EDGES.FL,
+    rubik.EDGES.DF,
+    rubik.EDGES.RF,
     rubik.CORNERS.URF,
     rubik.CORNERS.UFL,
     rubik.CORNERS.DLF,
@@ -296,9 +302,9 @@ Cube3D.prototype[rubik.MOVES.B] = function() {
     rubik.EDGES.DB,
     rubik.EDGES.LB,
     rubik.CORNERS.UBR,
-    rubik.CORNERS.UBL,
+    rubik.CORNERS.DRB,
     rubik.CORNERS.DBL,
-    rubik.CORNERS.DRB
+    rubik.CORNERS.UBL
   );
 };
 
